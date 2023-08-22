@@ -1,0 +1,71 @@
+---
+title: "Bird Joins"
+format: html
+editor: visual
+---
+
+```{r}
+library(tidyverse)
+library(here)
+```
+
+task 1: joins on bird
+
+```{r}
+# read in the CSVs
+bird_observations <- read_csv(here("data", "52_pp52_birds_1.csv"))
+
+bird_sites <- read_csv(here("data", "52_pp52_sites_1.csv"))
+
+bird_surveys <- read_csv(here("data", "52_pp52_surveys_1.csv"))
+
+bird_taxalist <- read_csv(here("data", "52_pp52_taxalist_1.csv"))
+```
+
+```{r}
+# create a subset of bird_observations that only contains observations for birds with species id "BHCO" and "RWBL", and from sites with site ID "LI-W" and "NU-C"
+birds_subset <- bird_observations %>% 
+  filter(species_id %in% c("BHCO", "RWBL"), 
+         site_id %in% c("LI-W", "NU-C"))
+```
+
+## left join practice
+
+```{r}
+birds_left <- left_join(birds_subset, bird_sites)
+
+birds_left <- left_join(birds_left, bird_taxalist)
+```
+
+## full join practice
+
+```{r}
+birds_full <- full_join(birds_subset, bird_sites, join_by(site_id))
+```
+
+# Task 2: data wrangling and visualization with birds
+
+```{r}
+# rename the notes column to bird_obs_notes, remember in rename that the new name = old name
+bird_observations %>% 
+  rename(bird_obs_notes = notes)
+
+birds_subset2 <- full_join(bird_observations, bird_sites)
+birds_subset2 <- full_join(birds_subset2, bird_surveys)
+birds_subset2 <- full_join(birds_subset2, bird_taxalist)
+
+birds_subset3 <- birds_subset2 %>% 
+  select(survey_date, common_name, park_name, bird_count)
+
+birds_subset4 <- birds_subset3 %>% 
+  mutate(survey_month = month(survey_date)) %>% 
+  mutate(survey_month = as.factor(survey_month)) %>% 
+  relocate(survey_month, .after = survey_date)
+
+birds_park_month <- birds_subset4 %>% 
+  filter(park_name %in% c("Lindo", "Orme", "Palomino", "Sonrisa")) %>% 
+  group_by(park_name, survey_month) %>% 
+  summarize(counts = n())
+```
+
+# 
