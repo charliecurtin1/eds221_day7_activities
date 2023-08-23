@@ -37,5 +37,5 @@ alarm_report <- alarm_report %>%
 
 # convert the data column to a date class using lubridate
 alarm_report <- alarm_report %>% 
-  lubridate::ymd(date)
+  mutate(date = lubridate::ymd(date))
 ```
